@@ -11,13 +11,11 @@ var {
   User
 } = require('./models/users')
 
-
 var app = express();
 
 app.use(bodyParser.json());
 
 app.post('/todos', (req, res) => {
-  console.log(req.body);
   var todo = new Todo({text: req.body.text});
   todo.save().then((docs) => {
     res.send(docs).status(200);
@@ -29,3 +27,7 @@ app.post('/todos', (req, res) => {
 app.listen(3000, () => {
   console.log('Server up and running');
 })
+
+module.exports = {
+  app
+};
