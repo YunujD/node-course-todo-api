@@ -2,15 +2,11 @@ const {ObjectID} = require('mongodb');
 const express = require('express');
 const bodyParser = require('body-parser');
 
-var {
-  mongoose
-} = require('./db/mongoose');
-var {
-  Todo
-} = require('./models/todos')
-var {
-  User
-} = require('./models/users')
+const port = process.env.PORT || 3000;
+
+const {mongoose} = require('./db/mongoose');
+const {Todo} = require('./models/todos')
+const {User} = require('./models/users')
 
 var app = express();
 
@@ -36,24 +32,18 @@ app.get('/todos', (req, res) => {
 app.get('/todos/:id', (req, res) => {
   var id = req.params.id;
   if (!ObjectID.isValid(id)) {
-    console.log('Id is not valid');
     return res.status(404).send();
   }
   Todo.findById(id).then((todo) => {
     if (!todo) {
-      res.status(404).send();
+      return res.status(404).send();
     }
     res.send({todo});
-  }, (err) => {
-    if (err) {
-      res.status(400).send({});
-    }
-  });
-
+  }, (err) => res.status(404).send());
 });
 
-app.listen(3000, () => {
-  console.log('Server up and running');
+app.listen(port, () => {
+  console.log(`Server up and running in port ${port}`);
 })
 
 module.exports = {
