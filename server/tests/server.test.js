@@ -1,6 +1,7 @@
 const expect = require('expect');
 const request = require('supertest');
 const {ObjectID} = require('mongodb');
+const _ = require('lodash');
 
 const {app} = require('./../server');
 const {Todo} = require('./../models/todos');
@@ -11,7 +12,9 @@ const todos = [
     text: 'first test todo'
   }, {
     _id: new ObjectID(),
-    text: 'second test todod'
+    text: 'second test todod',
+    completed: true,
+    completedAt: 333
   }
 ];
 
@@ -82,5 +85,40 @@ describe('GET /todos/:id', () => {
 
   it('Should return a 404 for non-object id', (done) => {
     request(app).get('/todos/123').expect(404).end(done);
+  });
+});
+
+
+describe('PATCH /todos/:id',()=>{
+  it('Should update the todo',(done)=>{
+    var todo = {
+      text: 'Updated todo',
+      completed: true
+    };
+
+    request(app)
+      .patch(`/todos/${todos[0]._id.toHexString()}`)
+      .send(todo)
+      .expect(200)
+      .expect((res)=>{
+        expect(_.pick(res.body, ['text','completed'])).toEqual(todo);
+        // expect(res.body.completedAt).toBeA('number');
+      })
+      .end(done);
+  });
+  var todo_negative = {
+    text: 'Latest todo',
+    completed: false
+  };
+
+  it('Should clear completedAt when completed is not true',(done)=>{
+    request(app)
+      .patch(`/todos/${todos[1]._id.toHexString()}`)
+      .send(todo_negative)
+      .expect(200)
+      .expect((res)=>{
+        expect((_.pick(res.body,['completedAt'])).completedAt).toBe(null);
+      })
+      .end(done);
   });
 });
